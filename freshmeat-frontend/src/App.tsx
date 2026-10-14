@@ -1,4 +1,11 @@
 import { useEffect, useState } from "react";
+import Login from "./Login";
+import Address from "./Address";
+import Products from "./Products";
+import Checkout from "./Checkout";
+import OrderConfirmation from "./OrderConfirmation";
+import OrderTracking from "./OrderTracking";
+import Admin from "./Admin";
 
 import {
 
@@ -402,7 +409,31 @@ function App() {
 
   const [selectedLocation, setSelectedLocation] = useState("");
 
-  const [cartCount, setCartCount] = useState(0);
+  type SharedCartItem = { name: string; pack: string; quantity: number; price: number };
+  const [cartItems, setCartItems] = useState<SharedCartItem[]>(() => {
+    try {
+      const saved = window.localStorage.getItem("freshmeat-cart");
+      return saved ? (JSON.parse(saved) as SharedCartItem[]) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [cartCount, setCartCount] = useState(() => {
+    try {
+      const saved = window.localStorage.getItem("freshmeat-cart");
+      const items = saved ? (JSON.parse(saved) as SharedCartItem[]) : [];
+      return items.reduce((total, item) => total + item.quantity, 0);
+    } catch {
+      return 0;
+    }
+  });
+  const [activeProduct, setActiveProduct] = useState<(typeof products)[number] | null>(null);
+  const [selectedPackIndex, setSelectedPackIndex] = useState(0);
+  const [packQuantity, setPackQuantity] = useState(1);
+  const [cartNotice, setCartNotice] = useState("");
+  const [cartOpen, setCartOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [signedInUser, setSignedInUser] = useState("");
 
   const [copiedCoupon, setCopiedCoupon] = useState("");
 
@@ -418,6 +449,19 @@ function App() {
 
     return () => window.clearInterval(timer);
 
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("freshmeat-cart", JSON.stringify(cartItems));
+    setCartCount(cartItems.reduce((total, item) => total + item.quantity, 0));
+  }, [cartItems]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("openCart") === "1") {
+      setCartOpen(true);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   }, []);
 
   const currentSlide = slides[slideIndex];
@@ -447,6 +491,59 @@ function App() {
     }
 
   };
+
+  if (window.location.pathname === "/address") {
+    return <Address />;
+  }
+  
+    if (window.location.pathname === "/admin") {
+  return <Admin />;
+  }
+
+
+  if (window.location.pathname === "/checkout") {
+    return <Checkout />;
+  }
+
+  if (window.location.pathname === "/order-confirmation") {
+    return <OrderConfirmation />;
+  }
+
+  if (window.location.pathname === "/track-order") {
+    return <OrderTracking />;
+  }
+
+
+  if (window.location.pathname === "/products") {
+    return (
+      <Products
+        sharedCartCount={cartItems.reduce((total, item) => total + item.quantity, 0)}
+        onBack={() => { window.location.href = "/"; }}
+        onCartClick={() => { window.location.href = "/?openCart=1"; }}
+        onAddToCart={(item) => {
+          const newItem: SharedCartItem = {
+            name: item.product.name,
+            pack: item.pack.weight,
+            quantity: item.quantity,
+            price: item.pack.price,
+          };
+          setCartItems((current) => {
+            const existingIndex = current.findIndex(
+              (row) => row.name === newItem.name && row.pack === newItem.pack
+            );
+            if (existingIndex >= 0) {
+              return current.map((row, index) =>
+                index === existingIndex
+                  ? { ...row, quantity: Math.min(20, row.quantity + newItem.quantity) }
+                  : row
+              );
+            }
+            return [...current, newItem];
+          });
+        }}
+      />
+    );
+  }
 
   return (
 
@@ -608,19 +705,16 @@ function App() {
 
           </div>
 
-          <button className="header-action" onClick={() => alert("Login page will be added in the next step.")}>
-
+          <button className="header-action" onClick={() => setLoginOpen(true)}>
             <UserRound size={19} />
-
-            <span>Login</span>
-
+            <span>{signedInUser || "Login"}</span>
           </button>
 
           <button
 
             className="header-action cart-action"
 
-            onClick={() => alert(`You have added ${cartCount} item(s). The full cart page is coming next.`)}
+            onClick={() => setCartOpen(true)}
 
           >
 
@@ -952,7 +1046,7 @@ function App() {
 
                     className="quick-add"
 
-                    onClick={() => setCartCount((count) => count + 1)}
+                    onClick={() => { setActiveProduct(product); setSelectedPackIndex(0); setPackQuantity(1); setCartNotice(""); }}
 
                     aria-label={`Add ${product.name} to cart`}
 
@@ -984,7 +1078,7 @@ function App() {
 
                       className="add-button"
 
-                      onClick={() => setCartCount((count) => count + 1)}
+                      onClick={() => { setActiveProduct(product); setSelectedPackIndex(0); setPackQuantity(1); setCartNotice(""); }}
 
                     >
 
@@ -1365,6 +1459,145 @@ function App() {
         </div>
 
       </footer>
+
+      {cartOpen && (
+        <div className="cart-overlay" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setCartOpen(false);
+        }}>
+          <section className="cart-dialog" role="dialog" aria-modal="true" aria-labelledby="cart-dialog-title">
+            <div className="cart-dialog-header">
+              <div>
+                <h2 id="cart-dialog-title">Your Cart</h2>
+                <p>{cartItems.reduce((sum, item) => sum + item.quantity, 0)} item(s) in your cart</p>
+              </div>
+              <button className="cart-close" onClick={() => setCartOpen(false)} aria-label="Close cart"><X size={21} /></button>
+            </div>
+            {cartItems.length === 0 ? (
+              <div className="cart-empty">
+                <ShoppingCart size={42} />
+                <h3>Your cart is empty</h3>
+                <p>Add your favourite FreshMeat products to get started.</p>
+                <button onClick={() => setCartOpen(false)}>Continue shopping</button>
+              </div>
+            ) : (
+              <>
+                <div className="cart-item-list">
+                  {cartItems.map((item, index) => (
+                    <article className="cart-item" key={`${item.name}-${item.pack}-${index}`}>
+                      <div className="cart-item-icon"><ShoppingCart size={22} /></div>
+                      <div className="cart-item-info">
+                        <h3>{item.name}</h3>
+                        <p>{item.pack}</p>
+                        <strong>₹{item.price} <span>per pack</span></strong>
+                        <div className="cart-item-quantity">
+                          <button aria-label={`Decrease ${item.name} quantity`} disabled={item.quantity <= 1} onClick={() => {
+                            setCartItems((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, quantity: Math.max(1, row.quantity - 1) } : row));
+                            setCartCount((count) => Math.max(0, count - 1));
+                          }}>−</button>
+                          <span>{item.quantity}</span>
+                          <button aria-label={`Increase ${item.name} quantity`} onClick={() => {
+                            setCartItems((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, quantity: Math.min(20, row.quantity + 1) } : row));
+                            setCartCount((count) => count + 1);
+                          }}>+</button>
+                        </div>
+                      </div>
+                      <div className="cart-item-total">
+                        <strong>₹{item.price * item.quantity}</strong>
+                        <button className="cart-remove" onClick={() => {
+                          setCartItems((current) => current.filter((_, rowIndex) => rowIndex !== index));
+                          setCartCount((count) => Math.max(0, count - item.quantity));
+                        }}>Remove</button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+                <div className="cart-summary">
+                  <div><span>Subtotal</span><strong>₹{cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)}</strong></div>
+                  <p>Delivery charges, if applicable, will be calculated at checkout.</p>
+                  <button onClick={() => {
+                    setCartOpen(false);
+                    window.location.href = "/checkout";
+                  }}>Continue to checkout <ArrowRight size={18} /></button>
+                  <button className="cart-continue-shopping" onClick={() => setCartOpen(false)}>Continue shopping</button>
+                </div>
+              </>
+            )}
+          </section>
+        </div>
+      )}
+
+      {cartNotice && (
+        <div className="pack-toast" role="status">
+          <CheckCircle2 size={20} />
+          <span>{cartNotice}</span>
+          <button onClick={() => setCartNotice("")} aria-label="Dismiss message"><X size={17} /></button>
+        </div>
+      )}
+
+      {activeProduct && (
+        <div className="pack-overlay" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setActiveProduct(null);
+        }}>
+          <section className="pack-dialog" role="dialog" aria-modal="true" aria-labelledby="pack-dialog-title">
+            <button className="pack-dialog-close" onClick={() => setActiveProduct(null)} aria-label="Close"><X size={20} /></button>
+            <h2 id="pack-dialog-title">{activeProduct.name}</h2>
+            <p className="pack-dialog-subtitle">Select your preferred pack size</p>
+            <div className="pack-choice-list">
+              {[
+                { label: "500Gm", old: activeProduct.oldPrice, price: activeProduct.price },
+                { label: "2 * 500 gm", old: activeProduct.oldPrice * 2, price: activeProduct.price * 2 - 10 },
+                { label: "4*500gm", old: activeProduct.oldPrice * 4, price: activeProduct.price * 4 - 20 },
+              ].map((pack, index) => (
+                <button key={pack.label} className={`pack-choice ${selectedPackIndex === index ? "selected" : ""}`} onClick={() => setSelectedPackIndex(index)}>
+                  <span className="pack-choice-radio" />
+                  <span className="pack-choice-label">{pack.label}</span>
+                  <span className="pack-choice-prices">
+                    {index > 0 && <del>₹{pack.old}</del>}
+                    <strong>₹{pack.price}</strong>
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div className="pack-quantity-line">
+              <strong>Quantity</strong>
+              <div className="pack-quantity-controls">
+                <button onClick={() => setPackQuantity((q) => Math.max(1, q - 1))} disabled={packQuantity <= 1} aria-label="Decrease quantity">−</button>
+                <span>{packQuantity}</span>
+                <button onClick={() => setPackQuantity((q) => Math.min(20, q + 1))} disabled={packQuantity >= 20} aria-label="Increase quantity">+</button>
+              </div>
+            </div>
+            <button className="pack-add-to-cart" onClick={() => {
+              const choices = [
+                { label: "500Gm", price: activeProduct.price },
+                { label: "2 * 500 gm", price: activeProduct.price * 2 - 10 },
+                { label: "4*500gm", price: activeProduct.price * 4 - 20 },
+              ];
+              const choice = choices[selectedPackIndex];
+              const lineTotal = choice.price * packQuantity;
+              setCartItems((items) => [...items, { name: activeProduct.name, pack: choice.label, quantity: packQuantity, price: choice.price }]);
+              setCartCount((count) => count + packQuantity);
+              setCartNotice(`${activeProduct.name} · ${choice.label} · Qty ${packQuantity} · Total ₹${lineTotal} added to cart`);
+              setActiveProduct(null);
+            }}>
+              ADD TO CART – ₹{([
+                activeProduct.price,
+                activeProduct.price * 2 - 10,
+                activeProduct.price * 4 - 20,
+              ][selectedPackIndex]) * packQuantity}
+            </button>
+          </section>
+        </div>
+      )}
+
+      {loginOpen && (
+        <Login
+          onClose={() => setLoginOpen(false)}
+          onLogin={(userLabel) => {
+            setSignedInUser(userLabel);
+            setLoginOpen(false);
+          }}
+        />
+      )}
 
       {locationOpen && (
 
