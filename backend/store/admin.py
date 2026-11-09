@@ -1,6 +1,18 @@
 
 from django.contrib import admin
-from .models import Category, Product
+from .models import (
+    Category,
+    Product,
+    ProductPack,
+    DeliveryApartment,
+    Order,
+    OrderItem,
+    Review,
+)
+
+
+admin.site.register(ProductPack)
+admin.site.register(Review)
 
 
 @admin.register(Category)
@@ -22,3 +34,20 @@ class ProductAdmin(admin.ModelAdmin):
     )
     search_fields = ("name",)
     list_filter = ("category", "is_active")
+
+
+@admin.register(DeliveryApartment)
+class DeliveryApartmentAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "area",
+        "pincode",
+        "is_approved",
+        "is_active",
+    )
+    search_fields = ("name", "area", "pincode", "full_address")
+    list_filter = ("is_approved", "is_active", "area")
+
+
+admin.site.register(Order)
+admin.site.register(OrderItem)

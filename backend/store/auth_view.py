@@ -3,7 +3,10 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .auth_serializers import RegisterSerializer
+from .auth_serializers import (
+    RegisterSerializer,
+    EmailTokenObtainPairSerializer,
+)
 
 
 class RegisterAPIView(generics.CreateAPIView):
@@ -12,4 +15,5 @@ class RegisterAPIView(generics.CreateAPIView):
 
 
 class LoginAPIView(TokenObtainPairView):
+    serializer_class = EmailTokenObtainPairSerializer
     permission_classes = [AllowAny]

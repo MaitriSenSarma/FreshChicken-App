@@ -26,7 +26,7 @@ import {
 import "./Products.css";
 
 type Pack = {
-
+  id: number;
   weight: string;
 
   price: number;
@@ -64,6 +64,12 @@ type ApiProduct = {
   original_price: string | null;
   stock_quantity: number;
   is_active: boolean;
+  packs: {
+    id: number;
+    pack_size: string;
+    price: string;
+    original_price: string | null;
+  }[];
 };
 
 const FALLBACK_IMAGE =
@@ -153,26 +159,44 @@ export default function Products({
       try {
         const response = await api.get<ApiProduct[]>("/products/");
 
-        const mappedProducts: Product[] = response.data.map((item) => ({
-          id: item.id,
-          name: item.name,
-          category: item.category_name,
-          description: item.description,
-          image: item.image
-            ? item.image.startsWith("http")
-              ? item.image
-              : `http://127.0.0.1:8000${item.image}`
-            : FALLBACK_IMAGE,
-          packs: [
-            {
-              weight: item.pack_size,
-              price: Number(item.price),
-              ...(item.original_price !== null
-                ? { originalPrice: Number(item.original_price) }
+        const mappedProducts: Product[] = response.data
+          .filter((item) => item.is_active)
+          .map((item) => {
+            const apiPacks: Pack[] = (item.packs ?? []).map((pack) => ({
+              id: pack.id,
+              weight: pack.pack_size,
+              price: Number(pack.price),
+              ...(pack.original_price !== null
+                ? { originalPrice: Number(pack.original_price) }
                 : {}),
-            },
-          ],
-        }));
+            }));
+
+            // Compatibility fallback for older products without ProductPack records.
+            const packs: Pack[] = apiPacks.length
+              ? apiPacks
+              : [{
+                  id: 0,
+                  weight: item.pack_size,
+                  price: Number(item.price),
+                  ...(item.original_price !== null
+                    ? { originalPrice: Number(item.original_price) }
+                    : {}),
+                }];
+
+            return {
+              id: item.id,
+              name: item.name,
+              category: item.category_name,
+              description: item.description,
+              image: item.image
+                ? item.image.startsWith("http")
+                  ? item.image
+                  : `http://127.0.0.1:8000${item.image}`
+                : FALLBACK_IMAGE,
+              packs,
+            };
+          })
+          .filter((item) => item.packs.length > 0);
 
         if (isMounted) {
           setProducts(mappedProducts);
@@ -194,6 +218,11 @@ export default function Products({
       isMounted = false;
     };
   }, []);
+
+  const availableCategories = useMemo(
+    () => ["All Products", ...Array.from(new Set(products.map((product) => product.category).filter(Boolean)))],
+    [products],
+  );
 
   const filteredProducts = useMemo(() => {
 
@@ -237,7 +266,7 @@ export default function Products({
 
     return result;
 
-  }, [category, search, sort]);
+  }, [category, search, sort, products]);
 
   function openPackSelector(product: Product) {
 
@@ -457,7 +486,7 @@ export default function Products({
 
           <div className="products-category-list">
 
-            {categories.map((item) => (
+            {Array.from(new Set([...categories.slice(0, 1), ...availableCategories.slice(1), ...categories.slice(1)])).map((item) => (
 
               <button
 
@@ -783,7 +812,7 @@ export default function Products({
 
                   <button
 
-                    key={pack.weight}
+                    key={pack.id || pack.weight}
 
                     className={
 
@@ -866,12 +895,6 @@ export default function Products({
                 ADD TO CART – ₹{selectedPack.price * quantity}
 
               </button>
-
-              <small className="pack-demo-note">
-
-                Offer prices shown are sample prices.
-
-              </small>
 
             </div>
 
