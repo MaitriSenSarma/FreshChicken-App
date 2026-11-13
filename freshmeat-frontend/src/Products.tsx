@@ -108,7 +108,7 @@ type CartItem = {
 };
 
 type ProductsProps = {
-
+  sharedCartCount?: number;
   onBack?: () => void;
 
   onCartClick?: () => void;
@@ -118,7 +118,7 @@ type ProductsProps = {
 };
 
 export default function Products({
-
+  sharedCartCount,
   onBack,
 
   onCartClick,
@@ -442,7 +442,9 @@ export default function Products({
 
           <span>Cart</span>
 
-          {cartCount > 0 && <b>{cartCount}</b>}
+          {(sharedCartCount ?? cartCount) > 0 && (
+  <b>{sharedCartCount ?? cartCount}</b>
+)}
 
         </button>
 

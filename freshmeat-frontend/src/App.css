@@ -3617,36 +3617,6 @@ main {
 }
 
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap");
-
-:root {
-
-  font-family: "Inter", sans-serif;
-
-  color: #17131c;
-
-  background: #fff;
-
-  font-synthesis: none;
-
-  text-rendering: optimizeLegibility;
-
-  -webkit-font-smoothing: antialiased;
-
-  --purple: #6c2bd9;
-
-  --dark-purple: #42156f;
-
-  --light-purple: #f3e9ff;
-
-  --muted: #6f6875;
-
-  --border: #e8e1ef;
-
-  --page-width: 1320px;
-
-}
-
 * {
 
   box-sizing: border-box;

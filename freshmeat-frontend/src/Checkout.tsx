@@ -95,7 +95,7 @@ export default function Checkout() {
     readJson<CartItem[]>("freshmeat-cart", [])
   );
 
-  const [address, setAddress] = useState<DeliveryDetails | null>(() =>
+  const [address] = useState<DeliveryDetails | null>(() =>
     readJson<DeliveryDetails | null>("freshmeat-delivery-address", null)
   );
 

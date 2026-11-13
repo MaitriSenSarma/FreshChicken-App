@@ -1,5 +1,3 @@
-import React from "react";
-
 const termsHtml = `<h1>TERMS OF SERVICE</h1>
 <p>These Terms of Service (&#x27;Agreement&#x27;) apply to the use of website – www.freshca.net (&#x27;Website&#x27;), the Freshca mobile application on iOS or Android devices including phones, tablets or any other electronic device (&#x27;Freshca App&#x27;) and the mobile site - www.m.freshca.net (&#x27;Msite&#x27;); whereas the Website, the Freshca App and the Msite are together referred to as the &#x27;Platform&#x27;.</p>
 <p>For the purposes of this Agreement, wherever the context so requires &#x27;you&#x27; or &#x27;User&#x27; shall mean any person including any natural or legal person who uses the Platform or buys any product of Roy Enterprises any computer system or other device including but not limited to any mobile device, handheld device and tablet and &#x27;we&#x27; shall mean Roy Enterprises.</p>

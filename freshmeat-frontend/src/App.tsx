@@ -84,7 +84,7 @@ type HomeBanner = {
 const fallbackSlides: HomeBanner[] = [
 
   {
-
+    id:1,
     eyebrow: "FRESHNESS YOU CAN TASTE",
 
     title: "Fresh cuts.\nDelivered fresh.",
@@ -102,7 +102,7 @@ const fallbackSlides: HomeBanner[] = [
   },
 
   {
-
+    id:2,
     eyebrow: "GOOD FOOD STARTS HERE",
 
     title: "Make every\nmeal special.",
@@ -120,7 +120,7 @@ const fallbackSlides: HomeBanner[] = [
   },
 
   {
-
+    id:3,
     eyebrow: "YOUR KITCHEN, YOUR WAY",
 
     title: "Fresh choices.\nEvery day.",

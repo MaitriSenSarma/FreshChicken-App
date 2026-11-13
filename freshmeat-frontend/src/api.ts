@@ -1,32 +1,50 @@
 
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+if (!API_BASE_URL) {
+  throw new Error("VITE_API_BASE_URL is not configured.");
+}
+
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: API_BASE_URL,
   timeout: 30000,
 });
 
+const publicRequests = [
+  { path: "/products/", methods: ["get"] },
+  { path: "/apartments/", methods: ["get"] },
+  { path: "/health/", methods: ["get"] },
+  { path: "/banners/", methods: ["get"] },
+  { path: "/coupons/", methods: ["get"] },
+  { path: "/coupons/validate/", methods: ["post"] },
+  { path: "/reviews/", methods: ["get"] },
+
+  { path: "/auth/phone/send-otp/", methods: ["post"] },
+  { path: "/auth/phone/verify-otp/", methods: ["post"] },
+  { path: "/auth/login/", methods: ["post"] },
+  { path: "/auth/register/", methods: ["post"] },
+];
+
 api.interceptors.request.use(
   (config) => {
-    const publicEndpoints = [
-      "/products/",
-      "/apartments/",
-      "/health/",
-      "/auth/phone/send-otp/",
-      "/auth/phone/verify-otp/",
-      "/auth/login/",
-      "/auth/register/",
-    ];
+    const method = (config.method || "get").toLowerCase();
+    const url = config.url || "";
 
-    const isPublicEndpoint = publicEndpoints.some((endpoint) =>
-      config.url?.startsWith(endpoint)
+    const isPublicRequest = publicRequests.some(
+      (endpoint) =>
+        url.startsWith(endpoint.path) &&
+        endpoint.methods.includes(method)
     );
 
     if (!config.headers) {
       config.headers = new axios.AxiosHeaders();
     }
 
-    if (!isPublicEndpoint) {
+    if (isPublicRequest) {
+      delete config.headers.Authorization;
+    } else {
       const token = localStorage.getItem("freshmeat-access-token");
 
       if (token) {
@@ -34,8 +52,6 @@ api.interceptors.request.use(
       } else {
         delete config.headers.Authorization;
       }
-    } else {
-      delete config.headers.Authorization;
     }
 
     return config;
