@@ -4,7 +4,7 @@ import {
   ClipboardList, Image as ImageIcon, LayoutDashboard, Menu,
   MessageSquare, Package, Search, Settings, ShieldCheck,
   ShoppingBag, Truck, Users, MapPin, RefreshCw, Eye, EyeOff,
-  Pencil, Trash2, Plus, X
+  Pencil, Trash2, Plus, X,LogOut,
 } from "lucide-react";
 import api from "./api";
 import "./Admin.css";
@@ -1282,6 +1282,29 @@ export default function Admin() {
       setUpdatingCouponId(null);
     }
   }
+  
+async function handleAdminLogout() {
+  const refreshToken = localStorage.getItem("freshmeat-refresh-token");
+
+  try {
+    if (refreshToken) {
+      await api.post("/auth/logout/", { refresh: refreshToken });
+    }
+  } catch (error) {
+    console.error("Logout failed:", error);
+  } finally {
+    localStorage.removeItem("freshmeat-access-token");
+    localStorage.removeItem("freshmeat-refresh-token");
+    localStorage.removeItem("freshmeat-user");
+
+    // Clear admin status too
+    localStorage.removeItem("freshmeat-is-admin");
+
+    // Return to homepage
+    window.location.replace("/");
+  }
+}
+
 
   /* -------------------- MAIN UI -------------------- */
 
@@ -1361,6 +1384,14 @@ export default function Admin() {
                 <small>Administrator</small>
               </span>
             </div>
+            <button
+              type="button"
+              className="fm-secondary"
+              onClick={handleAdminLogout}
+>
+              <LogOut size={16} />
+              Logout
+              </button>
           </div>
         </header>
 

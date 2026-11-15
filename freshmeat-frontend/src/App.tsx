@@ -58,6 +58,7 @@ import {
   CheckCircle2,
 
   Package,
+  LogOut,
 
 } from "lucide-react";
 
@@ -399,6 +400,9 @@ type SharedCartItem = {
   return localStorage.getItem("freshmeat-user") || "";
 
 });
+  const [isAdmin, setIsAdmin] = useState(
+  () => localStorage.getItem("freshmeat-is-admin") === "true"
+);
 
   const [copiedCoupon, setCopiedCoupon] = useState("");
   const [coupons, setCoupons] = useState<HomeCoupon[]>([]);
@@ -939,6 +943,32 @@ type SharedCartItem = {
     }
 
   };
+  // Customer logout
+const handleLogout = async () => {
+  const refreshToken = localStorage.getItem("freshmeat-refresh-token");
+
+  try {
+    if (refreshToken) {
+      // Send refresh token to Django to blacklist it.
+      // api.ts automatically attaches the access token.
+      await api.post("/auth/logout/", {
+        refresh: refreshToken,
+      });
+    }
+  } catch (error) {
+    console.error("Server logout failed:", error);
+  } finally {
+    // Clear login information from this browser.
+    localStorage.removeItem("freshmeat-access-token");
+    localStorage.removeItem("freshmeat-refresh-token");
+    localStorage.removeItem("freshmeat-user");
+
+    // Update the header immediately.
+    setSignedInUser("");
+    setLoginOpen(false);
+    setMobileMenuOpen(false);
+  }
+};
 
   if (window.location.pathname === "/terms-and-conditions") {
     return <TermsAndConditions />;
@@ -949,13 +979,16 @@ type SharedCartItem = {
     return <Address />;
 
   }
+if (window.location.pathname === "/admin") {
+  const accessToken = localStorage.getItem("freshmeat-access-token");
 
-    if (window.location.pathname === "/admin") {
-
-  return <Admin />;
-
+  if (!accessToken) {
+    window.location.replace("/");
+    return null;
   }
 
+  return <Admin />;
+}
   if (window.location.pathname === "/checkout") {
 
     return <Checkout />;
@@ -1208,13 +1241,32 @@ const newItem: SharedCartItem = {
 
           </div>
 
-          <button className="header-action" onClick={() => setLoginOpen(true)}>
+          {/* Customer account */}
+<button
+  type="button"
+  className="header-action"
+  onClick={() => {
+    if (!localStorage.getItem("freshmeat-access-token")) {
+      setLoginOpen(true);
+    }
+  }}
+>
+  <UserRound size={19} />
+  <span>{signedInUser || "Login"}</span>
+</button>
 
-            <UserRound size={19} />
-
-            <span>{signedInUser || "Login"}</span>
-
-          </button>
+{/* Logout button - visible only when customer is logged in */}
+{signedInUser && (
+  <button
+    type="button"
+    className="header-action"
+    onClick={handleLogout}
+    aria-label="Logout from your account"
+  >
+    <LogOut size={19} />
+    <span>Logout</span>
+  </button>
+)}
 
           <button
 
@@ -1276,27 +1328,19 @@ const newItem: SharedCartItem = {
 
         {/* Admin dashboard entry point. Admin API endpoints still enforce staff permissions. */}
 
-        <button
-
-          type="button"
-
-          className="header-action"
-
-          onClick={() => {
-
-            window.location.href = "/admin";
-
-          }}
-
-          aria-label="Open admin dashboard"
-
-        >
-
-          <Package size={19} />
-
-          <span>Admin Dashboard</span>
-
-        </button>
+        {isAdmin && (
+  <button
+    type="button"
+    className="header-action"
+    onClick={() => {
+      window.location.href = "/admin";
+    }}
+    aria-label="Open admin dashboard"
+  >
+    <Package size={19} />
+    <span>Admin Dashboard</span>
+  </button>
+)}
 
       </header>
 
@@ -2141,67 +2185,45 @@ const newItem: SharedCartItem = {
 
       )}
 
-      {loginOpen && (
+      
+{loginOpen && (
+  <Login
+    onClose={() => setLoginOpen(false)}
+    onLogin={(userLabel, adminStatus) => {
+      let displayName = "My Account";
 
-        <Login
+      try {
+        const user =
+          typeof userLabel === "string"
+            ? JSON.parse(userLabel)
+            : userLabel;
 
-          onClose={() => setLoginOpen(false)}
+        if (typeof user === "string") {
+          displayName = user;
+        } else if (user && typeof user === "object") {
+          displayName =
+            user.label ||
+            user.email ||
+            user.username ||
+            "My Account";
+        }
+      } catch {
+        displayName = userLabel || "My Account";
+      }
 
-        onLogin={(userLabel) => {
+      localStorage.setItem("freshmeat-user", displayName);
+      localStorage.setItem(
+        "freshmeat-is-admin",
+        String(adminStatus)
+      );
 
-        let displayName = "My Account";
+      setSignedInUser(displayName);
+      setIsAdmin(adminStatus);
+      setLoginOpen(false);
+    }}
+  />
+)}
 
-        try {
-
-          const user =
-
-      typeof userLabel === "string"
-
-        ? JSON.parse(userLabel)
-
-        : userLabel;
-
-    if (typeof user === "string") {
-
-      displayName = user;
-
-    } else if (user && typeof user === "object") {
-
-      displayName =
-
-        user.label ||
-
-        user.email ||
-
-        user.username ||
-
-        "My Account";
-
-    }
-
-  } catch {
-
-    displayName =
-
-      typeof userLabel === "string"
-
-        ? userLabel
-
-        : "My Account";
-
-  }
-
-  localStorage.setItem("freshmeat-user", displayName);
-
-  setSignedInUser(displayName);
-
-  setLoginOpen(false);
-
-}}
-
-        />
-
-      )}
 
       {locationOpen && (
 

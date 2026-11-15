@@ -38,6 +38,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return User.objects.create_user(**validated_data)
 
+
 class EmailTokenObtainPairSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(
@@ -71,4 +72,12 @@ class EmailTokenObtainPairSerializer(serializers.Serializer):
         return {
             "refresh": str(refresh),
             "access": str(refresh.access_token),
+
+            # Return actual authenticated user information
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "is_staff": user.is_staff,
+            },
         }

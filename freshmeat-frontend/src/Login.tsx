@@ -16,7 +16,7 @@ import "./Login.css";
 
 type LoginProps = {
   onClose: () => void;
-  onLogin: (userLabel: string) => void;
+  onLogin: (userLabel: string, isAdmin: boolean) => void;
 };
 
 type Method = "phone" | "email";
@@ -33,6 +33,7 @@ type PhoneLoginResponse = {
     id: number;
     phone: string;
     label: string;
+    is_staff: boolean;
   };
 };
 
@@ -172,7 +173,7 @@ export default function Login({ onClose, onLogin }: LoginProps) {
       );
 
       const { access, refresh, user } = response.data;
-
+      const isAdmin = user.is_staff === true;
       if (!access || !refresh || !user?.phone) {
         throw new Error(
           "Authentication server did not return the required login details."
@@ -195,7 +196,9 @@ export default function Login({ onClose, onLogin }: LoginProps) {
           : "Phone verified. You are signed in."
       );
 
-      onLogin(userLabel);
+      localStorage.setItem("freshmeat-is-admin", String(isAdmin));
+
+onLogin(userLabel, isAdmin);
     } catch (requestError: unknown) {
       setError(getErrorMessage(requestError));
     } finally {
@@ -274,12 +277,19 @@ export default function Login({ onClose, onLogin }: LoginProps) {
       const response = await api.post<{
   access: string;
   refresh: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    is_staff: boolean;
+  };
 }>("/auth/login/", {
   email: normalizedEmail,
   password,
 });
 
       const { access, refresh } = response.data;
+      const isAdmin = response.data.user?.is_staff === true;
 
       if (!access || !refresh) {
         throw new Error(
@@ -303,7 +313,9 @@ export default function Login({ onClose, onLogin }: LoginProps) {
           : "You are signed in successfully."
       );
 
-      onLogin(userLabel);
+      localStorage.setItem("freshmeat-is-admin", String(isAdmin));
+
+onLogin(userLabel, isAdmin);
     } catch (requestError: unknown) {
       setError(getErrorMessage(requestError));
     } finally {

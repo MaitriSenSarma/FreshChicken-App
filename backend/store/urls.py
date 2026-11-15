@@ -30,7 +30,7 @@ PublicCouponListAPIView,
 ValidateCouponAPIView,
 )
 from .phone_auth import SendPhoneOTPView, VerifyPhoneOTPView
-from .auth_view import RegisterAPIView, LoginAPIView
+from .auth_view import RegisterAPIView, LoginAPIView,LogoutAPIView
 
 urlpatterns = [
     path("health/", health_check, name="health_check"),
@@ -42,7 +42,7 @@ urlpatterns = [
 
     path("auth/register/", RegisterAPIView.as_view(), name="register"),
     path("auth/login/", LoginAPIView.as_view(), name="login"),
-
+    path("auth/logout/", LogoutAPIView.as_view(), name="logout"),
     path("checkout/", CheckoutAPIView.as_view(), name="checkout"),
     path("orders/", MyOrdersAPIView.as_view(), name="my_orders"),
     path("auth/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
