@@ -16,6 +16,7 @@ import Admin from "./Admin";
 
 import MyOrders from "./MyOrders";
 import TermsAndConditions from "./TermsAndConditions";
+import AboutUs from "./AboutUs";
 
 import api from "./api";
 
@@ -973,6 +974,9 @@ const handleLogout = async () => {
   if (window.location.pathname === "/terms-and-conditions") {
     return <TermsAndConditions />;
   }
+  if (window.location.pathname === "/about-us") {
+  return <AboutUs />;
+}
 
   if (window.location.pathname === "/address") {
 
@@ -1900,6 +1904,9 @@ const newItem: SharedCartItem = {
             <h3>Useful Links</h3>
             <a href="/terms-and-conditions">
               Terms &amp; Conditions
+            </a>
+             <a href="/about-us">
+            About Us
             </a>
           </div>
 

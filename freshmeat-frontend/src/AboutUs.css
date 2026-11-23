@@ -1,0 +1,233 @@
+/* =========================
+   ABOUT PAGE
+========================= */
+
+.about-page {
+  background: #f8f9fc;
+  color: #222;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Container */
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* =========================
+   HERO SECTION
+========================= */
+
+.about-hero {
+  background: linear-gradient(135deg, #6c3ef4, #8b5cf6);
+  color: white;
+  text-align: center;
+  padding: 90px 20px;
+}
+
+.about-hero h1 {
+  font-size: 48px;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.hero-subtitle {
+  font-size: 20px;
+  opacity: 0.95;
+}
+
+/* =========================
+   SECTION
+========================= */
+
+.about-section {
+  padding: 70px 0;
+}
+
+.about-section.light {
+  background: white;
+}
+
+.about-section h2 {
+  text-align: center;
+  font-size: 34px;
+  color: #6c3ef4;
+  margin-bottom: 25px;
+}
+
+.about-section p {
+  font-size: 17px;
+  line-height: 1.8;
+  color: #555;
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto 20px;
+}
+
+/* =========================
+   VALUE CARDS
+========================= */
+
+.value-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 25px;
+  margin-top: 50px;
+}
+
+.value-card {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
+  transition: .3s;
+}
+
+.value-card:hover {
+  transform: translateY(-8px);
+}
+
+.value-card h3 {
+  color: #6c3ef4;
+  margin-bottom: 15px;
+}
+
+.value-card p {
+  text-align: left;
+  margin: 0;
+  font-size: 15px;
+}
+
+/* =========================
+   OFFER LIST
+========================= */
+
+.offer-list {
+  list-style: none;
+  max-width: 650px;
+  margin: 40px auto 0;
+  padding: 0;
+}
+
+.offer-list li {
+  background: #fff;
+  margin-bottom: 15px;
+  padding: 18px 25px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,.08);
+  font-size: 17px;
+}
+
+/* =========================
+   FEATURES
+========================= */
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.features div {
+  background: white;
+  padding: 25px;
+  text-align: center;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 5px 15px rgba(0,0,0,.08);
+  transition: .3s;
+}
+
+.features div:hover {
+  background: #6c3ef4;
+  color: white;
+  transform: translateY(-5px);
+}
+
+/* =========================
+   CTA
+========================= */
+
+.about-cta {
+  background: linear-gradient(135deg, #6c3ef4, #8b5cf6);
+  color: white;
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.about-cta h2 {
+  font-size: 38px;
+  margin-bottom: 20px;
+}
+
+.about-cta p {
+  max-width: 700px;
+  margin: auto;
+  font-size: 18px;
+  line-height: 1.8;
+}
+
+.shop-btn {
+  display: inline-block;
+  margin-top: 35px;
+  background: white;
+  color: #6c3ef4;
+  text-decoration: none;
+  padding: 14px 40px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 17px;
+  transition: .3s;
+}
+
+.shop-btn:hover {
+  background: #f3f3f3;
+  transform: translateY(-3px);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width:768px) {
+
+  .about-hero {
+    padding: 70px 20px;
+  }
+
+  .about-hero h1 {
+    font-size: 34px;
+  }
+
+  .hero-subtitle {
+    font-size: 17px;
+  }
+
+  .about-section {
+    padding: 50px 0;
+  }
+
+  .about-section h2 {
+    font-size: 28px;
+  }
+
+  .about-section p {
+    font-size: 16px;
+  }
+
+  .about-cta h2 {
+    font-size: 30px;
+  }
+
+  .about-cta p {
+    font-size: 16px;
+  }
+
+  .shop-btn {
+    width: 100%;
+    max-width: 260px;
+  }
+}
